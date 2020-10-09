@@ -1,6 +1,9 @@
 { project ? import ./nix {} }:
 
-project.pkgs.mkShell {
-  nativeBuildInputs = project.devTools;
-}
+(project.pixie.overrideAttrs (pixie: {
+  nativeBuildInputs = pixie.nativeBuildInputs ++ project.devTools;
+  shellHook = pixie.shellHook + ''
+    ${project.ci.pre-commit-check}
+  '';
+})).env
 
