@@ -2,39 +2,22 @@
 }:
 
 let
-  config = {
-    packageOverrides = super: rec {
-      haskell = super.haskell // {
-        pixie = super.callCabal2nix "pixie" src;
-      };
-    };
-  };
-
-  pkgs = import sources.nixpkgs { inherit config; };
+  pkgs = import sources.nixpkgs {};
 
   # gitignore.nix
   gitignoreSource = (import sources."gitignore.nix" { inherit (pkgs) lib; }).gitignoreSource;
-
   src = gitignoreSource ./..;
-
-
 in
-with pkgs; {
+with pkgs; rec {
   inherit pkgs src;
 
+  pixie = pkgs.haskell.packages.ghc865.callPackage ./pixie.nix {};
+
   # provided by shell.nix
-  devTools = {
-    inherit niv pre-commit;
-  };
+  devTools = [ niv pre-commit cabal2nix ];
 
   # to be built by github actions
   ci = {
-    out = {
-      shell = compilerSet.shellFor {
-        packages = p: [ p.pixie ];
-        buildInputs = [ compilerSet.cabal-install ];
-      };
-    };
     pre-commit-check = (import sources."pre-commit-hooks.nix").run {
       inherit src;
       hooks = {

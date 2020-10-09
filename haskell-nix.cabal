@@ -1,7 +1,6 @@
 cabal-version: >= 1.10
 name: pixie
 version: 0.0.0
-build-type: simple
 
 executable pixie
   hs-source-dirs: src
