@@ -7,14 +7,23 @@ let
   # gitignore.nix
   gitignoreSource = (import sources."gitignore.nix" { inherit (pkgs) lib; }).gitignoreSource;
   src = gitignoreSource ./..;
+  haskell = pkgs.haskell.packages.ghc865;
 in
   with pkgs; {
-    inherit pkgs src;
+    inherit pkgs haskell src;
 
-    pixie = pkgs.haskell.packages.ghc865.callPackage ./pixie.nix {};
+
+    pixie = haskell.callPackage ./pixie.nix {};
 
     # provided by shell.nix
-    devTools = [ niv pre-commit cabal2nix ];
+    devTools = [
+      bashInteractive
+      cabal2nix
+      ghcid
+      haskell.fast-tags
+      niv
+      pre-commit
+    ];
 
     # to be built by github actions
     ci = {
